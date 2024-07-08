@@ -4,25 +4,36 @@ document.addEventListener('DOMContentLoaded', () => {
   const clearButton = document.getElementById('clear-button');
   const shoppingList = document.getElementById('shopping-list');
 
-  
   let items = JSON.parse(localStorage.getItem('shoppingList')) || [];
 
-  
   function renderList() {
     shoppingList.innerHTML = '';
     items.forEach((item, index) => {
       const listItem = document.createElement('li');
-      listItem.textContent = item.name;
+
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.checked = item.purchased;
+      checkbox.addEventListener('change', () => togglePurchased(index));
+      listItem.appendChild(checkbox);
+
+      const itemText = document.createElement('span');
+      itemText.textContent = item.name;
       if (item.purchased) {
-        listItem.classList.add('purchased');
+        itemText.classList.add('purchased');
       }
-      listItem.addEventListener('click', () => togglePurchased(index));
-      listItem.addEventListener('dblclick', () => editItem(index));
+      itemText.addEventListener('dblclick', () => editItem(index));
+      listItem.appendChild(itemText);
+
+      const deleteButton = document.createElement('button');
+      deleteButton.textContent = 'Delete';
+      deleteButton.addEventListener('click', () => deleteItem(index));
+      listItem.appendChild(deleteButton);
+
       shoppingList.appendChild(listItem);
     });
   }
 
-  
   function addItem() {
     const itemName = itemInput.value.trim();
     if (itemName !== '') {
@@ -33,20 +44,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-
   function togglePurchased(index) {
     items[index].purchased = !items[index].purchased;
     saveItems();
     renderList();
   }
 
-  
+  function deleteItem(index) {
+    items.splice(index, 1);
+    saveItems();
+    renderList();
+  }
+
   function clearList() {
     items = [];
     saveItems();
     renderList();
   }
-
 
   function editItem(index) {
     const newName = prompt('Edit item:', items[index].name);
@@ -57,7 +71,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  
   function saveItems() {
     localStorage.setItem('shoppingList', JSON.stringify(items));
   }
